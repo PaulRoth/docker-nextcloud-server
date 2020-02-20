@@ -1,8 +1,9 @@
-version: '3'
+version: '2'
 
 services:
   app:
     image: nextcloud
+    container_name: nextcloud_app
     environment:
       - REDIS_HOST=redis
     volumes:
@@ -10,18 +11,36 @@ services:
     links:
       - db
       - redis
+    networks:
+      default:
+        ipv4_address: 172.1.2.2
   redis:
     image: redis
+    container_name: nextcloud_redis
+    networks:
+      default:
+        ipv4_address: 172.1.2.3
   db:
     image: postgres:9
+    container_name: nextcloud_db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+      default:
+        ipv4_address: 172.1.2.4
 volumes:
   app:
     external: false
   db:
     external: false
+networks:
+  default:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.1.2.0/24
+         gateway: 172.1.2.1
